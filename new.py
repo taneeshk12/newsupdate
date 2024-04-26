@@ -141,7 +141,7 @@ def send_email():
             smtp.sendmail(email_sender, email_reciever, em.as_string())
 
 
-schedule.every(12).seconds.do(send_email)
+schedule.every(12).hours.do(send_email)
 
 while True:
     # check whether the scheduled task is due to run
