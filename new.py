@@ -7,14 +7,20 @@ from requests_html import HTMLSession
 import urllib.request
 from urllib.parse import urljoin
 from email.message import EmailMessage
-from app import password
+from passw import password
 import ssl
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import schedule
 import time
+import firebase_admin
+import google.cloud
+from firebase_admin import credentials, firestore
 
+
+cred = credentials.Certificate("./ServiceAccountKey.json")
+app = firebase_admin.initialize_app(cred)
 from requests_html import HTMLSession
 session = HTMLSession()
 
@@ -53,10 +59,28 @@ for key, value in link_dict.items():
 k = '{f}'
 print(f)
 def send_email():
+
+ 
+   
+
+    store = firestore.client()
+    doc_ref = store.collection('mail').limit(2)
+    mail_ids = []
+    try:
+        docs = doc_ref.get()
+        for doc in docs:
+            mail_id = doc.to_dict().get('text')
+            if mail_id:
+                mail_ids.append(mail_id)
+            print(u'Doc Data:{}'.format(doc.to_dict()))
+    except google.cloud.exceptions.NotFound:
+        print(u'Missing data')
+
+
     email_sender = 'the.ideaism08@gmail.com'
     email_password = password
     # email_reciever = st.text_input("Enter recipient email addresses (separated by commas):")
-    email_reciever = 'taneeshkpatel08@gmail.com'
+    email_reciever = ','.join(mail_ids)
     if email_sender and email_password and email_reciever:
         email_sender = email_sender.strip()
         email_password = email_password.strip()
@@ -76,6 +100,7 @@ def send_email():
 
         body += """
             </ul>
+            <p>visit out website <a href="https://ideaism.in">click here</a></p>
             <p>Click <a href="https://www.youtube.com/channel/UC3AxbWaYSn9c57izkVQhTGA">here</a> for more information.</p>
         </body>
         </html>
@@ -97,7 +122,7 @@ def send_email():
             smtp.sendmail(email_sender, email_reciever, em.as_string())
 
 
-schedule.every(24).hours.do(send_email)
+schedule.every(12).hours.do(send_email)
 
 while True:
     # check whether the scheduled task is due to run

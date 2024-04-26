@@ -7,7 +7,7 @@ import urllib.request
 from urllib.parse import  urljoin
 # import smtplib as s
 from email.message import EmailMessage
-from app import password
+from pass import password
 import ssl
 import smtplib
 from email.mime.multipart import MIMEMultipart
