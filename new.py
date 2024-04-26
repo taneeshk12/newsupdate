@@ -12,6 +12,8 @@ import ssl
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import schedule
+import time
 
 from requests_html import HTMLSession
 session = HTMLSession()
@@ -50,46 +52,54 @@ for key, value in link_dict.items():
 
 k = '{f}'
 print(f)
+def send_email():
+    email_sender = 'the.ideaism08@gmail.com'
+    email_password = password
+    # email_reciever = st.text_input("Enter recipient email addresses (separated by commas):")
+    email_reciever = 'taneeshkpatel08@gmail.com'
+    if email_sender and email_password and email_reciever:
+        email_sender = email_sender.strip()
+        email_password = email_password.strip()
+        email_reciever = [email.strip() for email in email_reciever.split(',')]
 
-email_sender = 'the.ideaism08@gmail.com'
-email_password = password
-email_reciever = st.text_input("Enter recipient email addresses (separated by commas):")
+        msg = MIMEMultipart("alternatives")
+        body = '''
+        <html>
+        <head></head>
+        <body>
+            <p>Hello,</p>
+            <p>Here are todays top headlines:</p>
+            <ul> '''
 
-if email_sender and email_password and email_reciever:
-    email_sender = email_sender.strip()
-    email_password = email_password.strip()
-    email_reciever = [email.strip() for email in email_reciever.split(',')]
+        for key, value in link_dict.items():
+            body += f"<li><h2> <a href=\"{key}\">{value}</a></h2></li> \n \n"
 
-    msg = MIMEMultipart("alternatives")
-    body = '''
-    <html>
-      <head></head>
-      <body>
-        <p>Hello,</p>
-        <p>Here are todays top headlines:</p>
-        <ul> '''
+        body += """
+            </ul>
+            <p>Click <a href="https://www.youtube.com/channel/UC3AxbWaYSn9c57izkVQhTGA">here</a> for more information.</p>
+        </body>
+        </html>
+        """
+        msg.attach(MIMEText(body, 'html'))
 
-    for key, value in link_dict.items():
-        body += f"<li><h2> <a href=\"{key}\">{value}</a></h2></li> \n \n"
+        em = EmailMessage()
+        em['From'] = email_sender
+        em['To'] = ",".join(email_reciever)
+        em['subject'] = "Today's news headlines just for you"
+        em.set_content(msg)
 
-    body += """
-        </ul>
-        <p>Click <a href="https://www.youtube.com/channel/UC3AxbWaYSn9c57izkVQhTGA">here</a> for more information.</p>
-      </body>
-    </html>
-    """
-    msg.attach(MIMEText(body, 'html'))
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
 
-    em = EmailMessage()
-    em['From'] = email_sender
-    em['To'] = ",".join(email_reciever)
-    em['subject'] = "Today's news headlines just for you"
-    em.set_content(msg)
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(email_sender, email_password)
+            smtp.sendmail(email_sender, email_reciever, em.as_string())
 
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
 
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
-        smtp.login(email_sender, email_password)
-        smtp.sendmail(email_sender, email_reciever, em.as_string())
+schedule.every(24).hours.do(send_email)
+
+while True:
+    # check whether the scheduled task is due to run
+    schedule.run_pending()
+    time.sleep(1)
