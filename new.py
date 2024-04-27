@@ -154,5 +154,5 @@ send_email()
 #     time.sleep(1)
 
 while True:
-    time.sleep(10)
+    time.sleep(3600)
     send_email()
