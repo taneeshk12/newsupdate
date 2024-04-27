@@ -17,6 +17,10 @@ import time
 import firebase_admin
 import google.cloud
 from firebase_admin import credentials, firestore
+from streamlit_autorefresh import st_autorefresh
+import time
+
+# send_email = st_autorefresh(interval=2000, limit=1)
 
 
 import os
@@ -141,9 +145,14 @@ def send_email():
             smtp.sendmail(email_sender, email_reciever, em.as_string())
 
 
-schedule.every(1).seconds.do(send_email)
+send_email()
+# schedule.every(1).seconds.do(send_email)
+
+# while True:
+#     # check whether the scheduled task is due to run
+#     schedule.run_pending()
+#     time.sleep(1)
 
 while True:
-    # check whether the scheduled task is due to run
-    schedule.run_pending()
-    time.sleep(1)
+    time.sleep(10)
+    send_email()
