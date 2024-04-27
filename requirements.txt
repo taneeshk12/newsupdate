@@ -84,4 +84,3 @@ websockets==10.4
 zipp==3.18.1
 lxml_html_clean
 schedule
-os
