@@ -368,5 +368,5 @@ def send_email():
 
 while True:
     send_email()
-    time.sleep(3600)
+    time.sleep(86400)
     
